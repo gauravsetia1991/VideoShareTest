@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Edverse</title>
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <script src="AgoraWebSDK/libs/agora-extension-virtual-background.js"></script>
+    <script src="AgoraWebSDK/libs/virtualbackground.js"></script>
+    <script src="AgoraWebSDK/libs/databuilder.js"></script>
+    <script src="AgoraWebSDK/libs/clientmanager.js"></script>
+    <script src="AgoraWebSDK/libs/wglwrapper.js"></script>
+    <script src="AgoraWebSDK/libs/audioeffects.js"></script>
+    <script src="AgoraWebSDK/libs/eventmanager.js"></script>
+    <script src="AgoraWebSDK/libs/engineglobals.js"></script>
+    <script src="AgoraWebSDK/libs/watermark.js"></script>
+    <script src="AgoraWebSDK/libs/customvideo.js"></script>
+    <script src="AgoraWebSDK/libs/agorachannel.js"></script>
+    <script src="AgoraWebSDK/libs/multichannel.js"></script>
+    <script src="AgoraWebSDK/libs/audiosystem.js"></script>
+    <script src="AgoraWebSDK/libs/testing.js"></script>
+    <script src="AgoraWebSDK/libs/agorautils.js"></script>
+    <script src="AgoraWebSDK/libs/audiomixing.js"></script>
+    <script src="AgoraWebSDK/agorartcenginev2.js"></script>
+    <script src="AgoraWebSDK/vendor/materialize.min.js"></script>
+    <script src="AgoraRTC_N.js"></script>
+    <script src="AgoraWebSDK/libs/spatial-audio-main.js" type="module"></script>
+    <script src="AgoraWebSDK/vendor/jquery.min.js"></script>
+	 <title>
+        Recorder v2.2
+    </title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+	 <style>
+           canvas {
+     width: 100%;
+     height: 100%;
+     position: absolute;
+     }
+	 
+	 #unity-canvas{
+		width: 100% !important; 
+		height: 100% !important; 
+		position: absolute !important; 
+		margin: auto !important;
+	 }
+         </style>
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop" style="width: 100%; height: 100%; position: absolute; margin: auto">
+      <canvas id="unity-canvas"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+	    <!-- Unity myDIV Started -->
+
+   <div id="myDIV">
+    <span><a id="download" style="display: none;"><button type="button" class="btn btn-primary mb-4"> Download</button></a></span>
+    <button type="button" class="btn btn-danger" id="stop" disabled>Stop</button>
+  <!--  <button type="button" onclick="recordAudio()" class="btn btn-info">Record Audio</button>
+    <button type="button" onclick="recordVideo()" class="btn btn-info">Record Video</button>
+    <button type="button" onclick="recordScreen()" class="btn btn-info">Record Screen</button>
+    <div class="p-5">   <video autoplay height='480' width="640" muted></video> </div>
+    -->
+    </div>
+  <!-- Unity myDIV Ended -->
+
+    </div>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="client.js"></script>
+    <script>
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl   + "/{{{ LOADER_FILENAME }}}";
+      var config = {
+        dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+        frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+        codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "Edverse Classroom",
+        productVersion: "1.0",
+      };
+
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var mobileWarning = document.querySelector("#unity-mobile-warning");
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        container.className = "unity-mobile";
+        config.devicePixelRatio = 1;
+        mobileWarning.style.display = "block";
+        setTimeout(() => {
+          mobileWarning.style.display = "none";
+        }, 5000);
+      } else {
+        canvas.style.width = "1280px";
+        canvas.style.height = "1920px";
+      }
+      loadingBar.style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+        }).then((unityInstance2) => {
+                unityInstance = unityInstance2;
+				loadingBar.style.display = "none";
+		  window.unityInstance = unityInstance;
+        }).catch((message) => {
+          alert(message);
+        });
+      };
+      document.body.appendChild(script);
+	  
+	   /*  ///////////////////////////// 
+    these line is called when index html loaded and I hide myDiv Block in html page
+  ///////////////////////////// */
+
+  function ShowDivPanel()
+  {
+  var x = document.getElementById("myDIV");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
+  }
+   ShowDivPanel();
+
+   /* ///////////////////////////// 
+  Ended
+  ///////////////////////////// */
+    </script>
+	<script>
+    let shouldStop = false;
+    let stopped = false;
+    const videoElement = document.getElementsByTagName("video")[0];
+    const downloadLink = document.getElementById('download');
+    const stopButton = document.getElementById('stop');
+    function startRecord() {
+        $('.btn-info').prop('disabled', true);
+        $('#stop').prop('disabled', false);
+        $('#download').css('display', 'none');
+    }
+    function stopRecord() {
+        $('.btn-info').prop('disabled', false);
+        $('#stop').prop('disabled', true);
+        $('#download').css('display', 'block');
+    }
+    // this function is called by Unity to stop the recording
+    function StopRecordingUnity(){
+       shouldStop = true;
+    }
+    // this function is claaed by unity to download the file
+    function DownloadUnityFile(url)
+    {
+      downloadLink.click();
+    };
+
+    const audioRecordConstraints = {
+        echoCancellation: true
+    }
+
+    stopButton.addEventListener('click', function () {
+        shouldStop = true;
+    });
+
+    const handleRecord = function ({stream, mimeType}) {
+        startRecord()
+        let recordedChunks = [];
+        stopped = false;
+        const mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = function (e) {
+            if (e.data.size > 0) {
+                recordedChunks.push(e.data);
+            }
+
+            if (shouldStop === true && stopped === false) {
+                mediaRecorder.stop();
+                stopped = true;
+            }
+        };
+
+        mediaRecorder.onstop = function () {
+            const blob = new Blob(recordedChunks, {
+                type: mimeType
+            });
+            recordedChunks = []
+            const filename = window.prompt('Enter file name');
+            downloadLink.href = URL.createObjectURL(blob);
+
+            var data = new FormData();
+      data.append('file', blob);
+      data.append('filename', filename);
+
+      $.ajax({
+        url :  "download.php",
+        type: 'POST',
+        data: data,
+        contentType: false,
+        processData: false,
+        success: function(data) {
+          alert("success saving file!");
+        },    
+        error: function() {
+          alert("error saving file!");
+        }
+      });
+
+            window.unityInstance.SendMessage("Bridge","ShowDownloadButton",downloadLink.href)
+            downloadLink.download = `${filename || 'recording'}.mp4`;
+            sendXHR();
+            stopRecord();
+            videoElement.srcObject = null;
+
+            
+
+     
+        };
+
+        mediaRecorder.start(200);
+    };
+
+    function sendXHR()
+    {
+    //Envia bien blob, no interpretado
+    var xhr = new XMLHttpRequest();
+    var video= videoElement;
+    xhr.open('GET', video.src , true);
+    xhr.responseType = 'blob';
+    xhr.onload = function(e) {
+    if (this.status == 200) {
+        // Note: .response instead of .responseText
+        var blob = new Blob([this.response], {type: 'video/mp4'});
+        alert(blob.size/1024);
+        alert(blob.type);
+        form = new FormData(),
+        request = new XMLHttpRequest();
+        form.append("myblob",blob,"Capture.mp4");
+        form.append("myname","recordedVideo_Upload_01");
+        request.open("POST","./UploadServlet",true);
+        request.send(form);
+       }
+    };
+    xhr.send();
+    };
+
+    async function recordAudio() {
+        const mimeType = 'audio/webm';
+        shouldStop = false;
+        const stream = await navigator.mediaDevices.getUserMedia({audio: audioRecordConstraints});
+        handleRecord({stream, mimeType})
+    }
+
+    async function recordVideo() {
+        const mimeType = 'video/webm';
+        shouldStop = false;
+        const constraints = {
+            audio: {
+                "echoCancellation": true
+            },
+            video: {
+                "width": {
+                    "min": 640,
+                    "max": 1024
+                },
+                "height": {
+                    "min": 480,
+                    "max": 768
+                }
+            }
+        };
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        videoElement.srcObject = stream;
+        handleRecord({stream, mimeType})
+    }
+    // this function is called by Unity to start Recording Screen
+    async function recordScreen() {
+      window.unityInstance.SendMessage("Bridge", "ShowStopRecording");
+        const mimeType = 'video/webm';
+        shouldStop = false;
+        const constraints = {
+            video: {
+                cursor: 'motion'
+            }
+        };
+        if(!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia)) {
+            return window.alert('Screen Record not supported!')
+        }
+        let stream = null;
+        const displayStream = await navigator.mediaDevices.getDisplayMedia({video: {cursor: "motion"}, audio: {'echoCancellation': true}});
+        if(window.confirm("Record audio with screen?")){
+            const audioContext = new AudioContext();
+
+            const voiceStream = await navigator.mediaDevices.getUserMedia({ audio: {'echoCancellation': true}, video: false });
+            const userAudio = audioContext.createMediaStreamSource(voiceStream);
+            
+            const audioDestination = audioContext.createMediaStreamDestination();
+            userAudio.connect(audioDestination);
+
+            if(displayStream.getAudioTracks().length > 0) {
+                const displayAudio = audioContext.createMediaStreamSource(displayStream);
+                displayAudio.connect(audioDestination);
+            }
+
+            const tracks = [...displayStream.getVideoTracks(), ...audioDestination.stream.getTracks()]
+            stream = new MediaStream(tracks);
+            handleRecord({stream, mimeType})
+        } else {
+            stream = displayStream;
+            handleRecord({stream, mimeType});
+        };
+        videoElement.srcObject = stream;
+    }
+</script>
+   <!-- ///////////////////////////// -->
+  <!-- Video Recoder JavaScript Code Ended -->
+  <!-- ///////////////////////////// -->
+  </body>
+</html>
